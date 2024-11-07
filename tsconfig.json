@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",             // Output folder for compiled JS files
+    "module": "commonjs",            // CommonJS modules for compatibility with Node
+    "target": "es6",                 // Target ECMAScript 6 for compatibility
+    "jsx": "react",                  // Allow React JSX syntax
+    "declaration": true,             // Generate .d.ts files for types
+    "strict": true                   // Enable strict type checking
+  },
+  "include": ["src"]                 // Only compile files in the "src" folder
+}
