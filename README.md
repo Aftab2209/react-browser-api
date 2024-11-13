@@ -1,13 +1,96 @@
+
+
 # 📦 `react-browser-api`
 
 A powerful and simple-to-use React hooks library for accessing browser APIs like **Geolocation** and **Clipboard**. With this library, you can effortlessly integrate real-time location tracking and clipboard functionality into your React applications.
 
+
 ---
+
 
 ## 🚀 Installation
 
+
 ```bash
 npm install react-browser-api
+```
+
+
+## 💾 useLocalStorage
+
+A React hook for interacting with localStorage. It supports multiple keys, initialization with default values, and dynamic updates to localStorage.
+
+
+### API:
+
+storedValues: An object holding all key-value pairs from localStorage.
+
+error: Any error that occurs during reading/writing to localStorage.
+
+setValue(key, value): Sets a value for a given key.
+
+clear(key): Clears a specific key from localStorage and state.
+
+addKey(key, value): Adds a new key-value pair to localStorage and state.
+
+deleteKey(key): Deletes a specific key from localStorage and state.
+
+
+```bash
+import { useLocalStorage } from './useLocalStorage';
+
+const MyComponent = () => {
+  // Initialize with no keys or with keys
+  const { storedValues, addKey, deleteKey, getKey, error } = useLocalStorage([], {});
+
+  const handleAddKey = () => {
+    addKey('user', 'John Doe');
+  };
+
+  const handleDeleteKey = (key: string) => {
+    deleteKey(key);
+  };
+
+};
+```
+
+## ⌛ useSessionStorage
+
+A React hook for interacting with sessionStorage. It functions similarly to useLocalStorage but persists data only for the duration of the page session.
+
+### API:
+
+storedValues: An object holding all key-value pairs from sessionStorage.
+
+error: Any error that occurs during reading/writing to sessionStorage.
+
+setValue(key, value): Sets a value for a given key.
+
+clear(key): Clears a specific key from sessionStorage and state.
+
+addKey(key, value): Adds a new key-value pair to sessionStorage and state.
+
+deleteKey(key): Deletes a specific key from sessionStorage and state.
+
+getKey(key): Retrieves the value of a specific key.
+
+
+
+```bash
+import { useSessionStorage } from './useSessionStorage';
+
+const MyComponent = () => {
+  // Initialize with no keys
+  const { storedValues, addKey, deleteKey, getKey, error } = useSessionStorage([], {});
+
+  const handleAddKey = () => {
+    addKey('theme', 'dark');
+  };
+
+  const handleDeleteKey = (key: string) => {
+    deleteKey(key);
+  };
+};
 ```
 
 ## 🧭 useGeolocation
@@ -15,6 +98,8 @@ npm install react-browser-api
 The useGeolocation hook allows you to fetch the user's current location and track it in real-time (if desired). It provides latitude, longitude, and accuracy values, along with error handling.
 
 ### 📌 Usage
+
+
 ```bash
 import React from "react";
 import { useGeolocation } from "react-browser-api";
@@ -40,8 +125,11 @@ function LocationComponent() {
 The useGeolocation hook accepts an optional configuration object:
 
 enableHighAccuracy: boolean (default: false) – Request high accuracy location.
+
 timeout: number (default: 10000) – Maximum time (in ms) allowed for obtaining location.
+
 maximumAge: number (default: 0) – Maximum age (in ms) of a possible cached position.
+
 watch: boolean (default: false) – Continuously track location updates.
 
 ### 🧾 Return Values

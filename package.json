@@ -1,12 +1,8 @@
 {
   "name": "react-browser-api",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "peerDependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
-  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx tsc"
@@ -18,8 +14,12 @@
   "keywords": [
     "react",
     "react-browser",
-    "browser-api",
-    "browser-hooks"
+    "browser api",
+    "local-storage",
+    "session",
+    "Next Js",
+    "api",
+    "cache"
   ],
   "author": "Aftab",
   "license": "ISC",
@@ -31,5 +31,8 @@
   "devDependencies": {
     "@types/react": "^18.3.1",
     "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "react-browser-api": "file:"
   }
 }
