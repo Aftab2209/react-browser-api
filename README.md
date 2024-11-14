@@ -1,176 +1,314 @@
+# 📦 react-browser-api
+
+[![npm version](https://badge.fury.io/js/react-browser-api.svg)](https://www.npmjs.com/package/your-package-name)
+[![downloads](https://img.shields.io/npm/dm/react-browser-api.svg)](https://www.npmjs.com/package/your-package-name)
+
+A simple yet powerful React hooks library for browser APIs like enhanced LocalStorage with auto-expiry and easy set/get methods to track item age, same for Session Storage, Geolocation, and Clipboard. Effortlessly add real-time location tracking, clipboard access, and smart storage to your React apps.
+
+---
+
+## 📜 Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [API Reference](#api-reference)
+- [Examples](#examples)
+- [Configuration](#configuration)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
+
+## 🌟 Key Features
 
 
-# 📦 `react-browser-api`
-
-A powerful and simple-to-use React hooks library for accessing browser APIs like **Geolocation** and **Clipboard**. With this library, you can effortlessly integrate real-time location tracking and clipboard functionality into your React applications.
+- 💾 **Enhanced LocalStorage Support**:
+  - **Auto-Expiry**: Set expirations(optional) for stored items, automatically removing them when expired.
+  - **Age Tracking**: Check how long an item has been stored and track its last-set duration.
+- ⚡ **Lightweight and Efficient**: Optimized for performance with minimal dependencies and easy setup.
+- 🚀 **Effortless API Access**: Easily integrate Geolocation, Clipboard, LocalStorage, and SessionStorage APIs with just a few hooks.
+- 📍 **Real-Time Location Tracking**: Access user location seamlessly with the Geolocation hook.
+- 📋 **Clipboard Control**: Simple methods to read from and write to the user’s clipboard.
 
 
 ---
 
-
 ## 🚀 Installation
 
+You can install `react-browser-api` using npm or yarn:
 
 ```bash
+# Using npm
 npm install react-browser-api
+
+# Using yarn
+yarn ad
+d react-browser-api
+```
+---
+
+# 💡 Usage
+
+## 🗃️ useLocalStorage
+
+The `useLocalStorage` hook allows you to interact with `localStorage` efficiently, offering features like key expiration and last-set duration tracking.
+
+
+### Import the Hook
+
+To start using the hook, import it as follows:
+
+```javascript
+
+import { useLocalStorage } from 'react-browser-api';
+
 ```
 
 
-## 💾 useLocalStorage
+### Initialize the Hook
 
-A React hook for interacting with localStorage. It supports multiple keys, initialization with default values, and dynamic updates to localStorage.
+```javascript
 
-
-### API:
-
-storedValues: An object holding all key-value pairs from localStorage.
-
-error: Any error that occurs during reading/writing to localStorage.
-
-setValue(key, value): Sets a value for a given key.
-
-clear(key): Clears a specific key from localStorage and state.
-
-addKey(key, value): Adds a new key-value pair to localStorage and state.
-
-deleteKey(key): Deletes a specific key from localStorage and state.
+const {
+  storedValues,  // All stored key-value pairs
+  error,         // Error message, if any
+  setValue,      // Function to set a value
+  clear,         // Function to clear a key-value pair
+  addKey,        // Function to add a new key
+  deleteKey,     // Function to delete a key
+  getKey,        // Function to retrieve the value of a key
+  getDuration,   // Function to get time since key was set
+} = useLocalStorage();
 
 
-```bash
-import { useLocalStorage } from './useLocalStorage';
+```
+### LocalStorage Functions
+<br>
 
-const MyComponent = () => {
-  // Initialize with no keys or with keys
-  const { storedValues, addKey, deleteKey, getKey, error } = useLocalStorage([], {});
+| Function    | Description                                                                   | Parameters                                                                                                                                                                                  | Return Type              |
+|-------------|-------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------|
+| **setValue**    | Sets a value for a specified key with an optional expiry time.                | **key (string)**: The key to set <br> **value (string or null)**: The value to store <br> **expireIn (number, optional)**: Expiry time in milliseconds. If omitted, the key will persist indefinitely.  | void                     |
+| **clear**       | Removes a specific key from localStorage.                                     | **key (string)**: The key to clear                                                                                                                                                              | void                     |
+| **addKey**      | Adds a new key-value pair to localStorage with an optional expiry time.       | **key (string)**: The key to add <br> **value (string or null)**: The value to store <br>  **expireIn (number, optional)**: Expiry time in milliseconds                                                 | void                     |
+| **deleteKey**   | Deletes a specific key from localStorage, removing it from state and storage. | **key (string)**: The key to delete                                                                                                                                                             | void                     |
+| **getKey**      | Retrieves the value of a specified key from localStorage.                     | **key (string)**: The key to retrieve                                                                                                                                                           | string or null           |
+| **getDuration** | Returns the time duration (in minutes) since the specified key was last set.  | **key (string)**: The key to check                                                                                                                                                              | number (minutes) or null |
 
-  const handleAddKey = () => {
-    addKey('user', 'John Doe');
-  };
+### LocalStorage State Properties
 
-  const handleDeleteKey = (key: string) => {
-    deleteKey(key);
-  };
+<br>
 
-};
+| **Property** | **Description**                                                   |
+|--------------|-------------------------------------------------------------------|
+| **storedValues** | Contains all key-value pairs currently in localStorage.           |
+| **error**        | Contains any error message that occurs during storage operations. |
+
+
+### Usage Examples
+
+<br>
+
+**1. Setting a Value with Expiry**
+```
+ setValue('userToken', 'abc123', 60000); // Expires in 60 seconds
 ```
 
-## ⌛ useSessionStorage
-
-A React hook for interacting with sessionStorage. It functions similarly to useLocalStorage but persists data only for the duration of the page session.
-
-### API:
-
-storedValues: An object holding all key-value pairs from sessionStorage.
-
-error: Any error that occurs during reading/writing to sessionStorage.
-
-setValue(key, value): Sets a value for a given key.
-
-clear(key): Clears a specific key from sessionStorage and state.
-
-addKey(key, value): Adds a new key-value pair to sessionStorage and state.
-
-deleteKey(key): Deletes a specific key from sessionStorage and state.
-
-getKey(key): Retrieves the value of a specific key.
-
-
-
-```bash
-import { useSessionStorage } from './useSessionStorage';
-
-const MyComponent = () => {
-  // Initialize with no keys
-  const { storedValues, addKey, deleteKey, getKey, error } = useSessionStorage([], {});
-
-  const handleAddKey = () => {
-    addKey('theme', 'dark');
-  };
-
-  const handleDeleteKey = (key: string) => {
-    deleteKey(key);
-  };
-};
+**2. Retrieving a Value**
+```
+const token = getKey('userToken'); // Returns 'abc123' if not expired
 ```
 
-## 🧭 useGeolocation
-
-The useGeolocation hook allows you to fetch the user's current location and track it in real-time (if desired). It provides latitude, longitude, and accuracy values, along with error handling.
-
-### 📌 Usage
-
-
-```bash
-import React from "react";
-import { useGeolocation } from "react-browser-api";
-
-function LocationComponent() {
-  const { position, error } = useGeolocation({ watch: true, enableHighAccuracy: true });
-
-  return (
-    <div>
-      <h2>Current Location</h2>
-      {position ? (
-        <p>Latitude: {position.latitude}, Longitude: {position.longitude}</p>
-      ) : (
-        <p>{error ? `Error: ${error}` : "Fetching location..."}</p>
-      )}
-    </div>
-  );
-}
+**3. Deleting a Key**
+```
+deleteKey('userToken'); // Removes 'userToken' from localStorage
 ```
 
-### ⚙️ Options
+**4. Checking Duration Since Set**
+```
+const minutesElapsed = getDuration('userToken'); // Returns minutes since 'userToken' was set
+```
+**5. Clearing a Key**
+```
+clear('userToken'); // Clears 'userToken' from localStorage and state
+```
+<br>
 
-The useGeolocation hook accepts an optional configuration object:
+## 🗃️ useSessionStorage
 
-enableHighAccuracy: boolean (default: false) – Request high accuracy location.
+This custom hook provides a simple and flexible way to manage session storage in your React applications. It supports features like time-to-live (TTL) for key expiration, session storage syncing across tabs, and batch operations for managing multiple keys.
 
-timeout: number (default: 10000) – Maximum time (in ms) allowed for obtaining location.
+## Key Features
 
-maximumAge: number (default: 0) – Maximum age (in ms) of a possible cached position.
+- 🔹 **Set and Get Values**: Easily set, get, and delete values from sessionStorage.
+- 🔹 **Time-to-Live (TTL)**: Automatically set expiration time for keys.
+- 🔹 **Sync Across Tabs**: Sync session storage values across different browser tabs.
+- 🔹 **Batch Operations**: Set and get multiple keys at once.
+- 🔹 **Error Handling**: Tracks and reports any issues with reading or writing to sessionStorage.
 
-watch: boolean (default: false) – Continuously track location updates.
+<br>
 
-### 🧾 Return Values
+## Usage
 
-position: { latitude: number, longitude: number, accuracy: number } | null – The latest geolocation data.
-error: string | null – Error message if the location could not be retrieved.
+### Import the Hook
+
+To start using the hook, import it as follows:
+
+```javascript
+
+import { useSessionStorage } from 'react-browser-api';
+
+```
+
+### Initialize the Hook
+
+<br>
+
+```javascript
+
+const {
+  storedValues,
+  setValue,
+  getKey,
+  clear,
+  addKey,
+  deleteKey,
+  batchSet,
+  batchGet,
+  error
+} = useSessionStorage();
+
+```
+
+### API Reference
+
+<br>
+
+| **Function** | **Description**                                                   |
+|--------------|-------------------------------------------------------------------|
+| **ssetValue(key, value, ttl)** |Sets a value for a given key in sessionStorage with an optional TTL.         |
+| **clear(key)**        | Clears the value for a given key from sessionStorage. |
+| **addKey(key, value, ttl)** | Adds a new key-value pair to sessionStorage with an optional TTL.      |
+| **deleteKey(key)**        | Deletes a key-value pair from sessionStorage and state. |
+| **getKey(key)** | Retrieves the value of a specific key from sessionStorage.           |
+| **batchSet(items, ttl)**        | Sets multiple key-value pairs at once in sessionStorage with an optional TTL for each.
+| **batchGet(keys)** | Retrieves multiple keys at once from sessionStorage.|
+
+
+<br>
 
 ## 📋 useClipboard
 
-The useClipboard hook enables seamless clipboard interactions by providing methods to copy to and read from the clipboard, along with error handling.
+This custom hook provides a simple interface for copying text to and reading text from the clipboard. It handles common clipboard operations and error management.
 
-### 📌 Usage
+## Key Features
 
-```bash
-import React from "react";
-import { useClipboard } from "react-browser-api";
+- **Copy to Clipboard**: Easily copy text to the clipboard.
+- **Read from Clipboard**: Retrieve text from the clipboard.
+- **Error Handling**: Tracks and reports errors during clipboard operations.
+- **State Management**: Updates state with the current clipboard content.
 
-function ClipboardComponent() {
-  const { clipboardContent, error, copyToClipboard, readFromClipboard } = useClipboard();
+## Usage
 
-  return (
-    <div>
-      <h2>Clipboard Example</h2>
-      <button onClick={() => copyToClipboard("Hello World!")}>Copy Text</button>
-      <button onClick={readFromClipboard}>Read Clipboard</button>
-      {clipboardContent && <p>Clipboard Content: {clipboardContent}</p>}
-      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
-    </div>
-  );
-}
+### Import the Hook
+
+To start using the hook, import it as follows:
+
+```javascript
+
+import { useClipboard } from 'react-browser-api';
+
 ```
 
-### 🧾 Return Values
+### Initialize the Hook
 
-clipboardContent: string | null – The current content of the clipboard.
-error: string | null – Error message if there was an issue with clipboard access.
-copyToClipboard: (text: string) => Promise<void> – Copies the specified text to the clipboard.
-readFromClipboard: () => Promise<void> – Reads text from the clipboard.
+<br>
+
+```javascript
+
+const { clipboardContent, error, copyToClipboard, readFromClipboard } = useClipboard();
+
+```
+
+### API Reference
+
+<br>
+
+| Variable / Function       | Description                                                             |
+|---------------------------|-------------------------------------------------------------------------|
+| `clipboardContent`         | Stores the current content of the clipboard (either the copied or read value). |
+| `error`                    | Stores any error message if an operation fails (copy or read).           |
+| `copyToClipboard(text)`    | Copies the provided `text` to the clipboard and updates `clipboardContent`. |
+| `readFromClipboard()`      | Reads the current text from the clipboard and updates `clipboardContent`. |
 
 
-## ❤️ Developed by
+<br>
 
-**Aftab**  
-[🌐 Website](https://www.aftabalam.in/)
+## 📍 useGeolocation
+
+The `useGeolocation` hook provides an easy way to retrieve the user's geolocation data, with support for both one-time fetches and continuous location updates. It also handles browser compatibility issues and provides error handling.
+
+
+## Key Features
+
+- **Get Current Position**: Fetches the user's current geolocation (`latitude`, `longitude`, `accuracy`).
+- **Watch for Position Updates**: Optionally, continuously track the user's location.
+- **Error Handling**: Provides an error message if geolocation is not supported or if there are issues retrieving the position.
+- **High Accuracy Option**: Option to request high-accuracy geolocation data.
+
+## Usage
+
+### Import the Hook
+
+To start using the hook, import it as follows:
+
+```javascript
+
+import { useGeolocation } from 'react-browser-api';
+
+```
+
+### Initialize the Hook
+
+<br>
+
+```javascript
+
+ const { position, error } = useGeolocation({
+    enableHighAccuracy: true,
+    timeout: 5000,
+    watch: true,  // Keep watching the geolocation
+  });
+
+```
+### Options  object
+
+<br>
+
+| Property             | Type      | Default   | Description                                                                                 |
+|----------------------|-----------|-----------|---------------------------------------------------------------------------------------------|
+| `enableHighAccuracy` | `boolean` | `false`   | If set to `true`, the browser will attempt to fetch a more accurate position (e.g., GPS).    |
+| `timeout`            | `number`  | `10000`   | The maximum time (in milliseconds) to wait for a geolocation response before timing out.     |
+| `maximumAge`         | `number`  | `0`       | The maximum age (in milliseconds) of a cached position that will be used.                   |
+| `watch`              | `boolean` | `false`   | If `true`, the geolocation will be tracked continuously using `watchPosition`.              |
+
+
+### API Reference
+
+| Variable / Function       | Description                                                             |
+|---------------------------|-------------------------------------------------------------------------|
+| `position`                | Contains the current geolocation (latitude, longitude, accuracy) or `null` if not available. |
+| `error`                   | Stores any error message if geolocation retrieval fails (e.g., unsupported browser or other errors). |
+| `options`                 | Options object for the geolocation request. Includes:                    |
+|                           | - `enableHighAccuracy`: Whether to request high-accuracy geolocation (default: `false`) |
+|                           | - `timeout`: The maximum time (in milliseconds) to wait for a geolocation response (default: `10000ms`) |
+|                           | - `maximumAge`: The maximum age (in milliseconds) of a cached position to return (default: `0ms`) |
+|                           | - `watch`: Whether to use `watchPosition` instead of `getCurrentPosition` for continuous updates (default: `false`) |
+
+
+## About Me
+
+### Developed by Aftab.  
+Visit my personal website at [www.aftabalam.in](http://www.aftabalam.in).
+
+
+

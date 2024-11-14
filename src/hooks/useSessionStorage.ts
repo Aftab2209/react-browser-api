@@ -1,25 +1,17 @@
 import { useState, useEffect } from 'react';
 
 // Type definition for the stored values
-type StoredValues = Record<string, string | null>;  
+type StoredValues = Record<string, string | null>;
 
-export const useSessionStorage = (
-  keys: string[] = [], 
-  initialValues: Record<string, string | null> = {},
-  ttl: number = 0 // Time-to-live in milliseconds
-) => {
+export const useSessionStorage = () => {
   const [storedValues, setStoredValues] = useState<StoredValues>({});
   const [error, setError] = useState<string | null>(null);
 
-  // Function to serialize non-primitive data (like objects)
-  const serialize = (value: any) => {
-    return JSON.stringify(value);
-  };
+  // Function to serialize data
+  const serialize = (value: any) => JSON.stringify(value);
 
-  // Function to deserialize the stored data
-  const deserialize = (value: string) => {
-    return JSON.parse(value);
-  };
+  // Function to deserialize stored data
+  const deserialize = (value: string) => JSON.parse(value);
 
   // Function to set the expiration time for a key (TTL)
   const setExpiry = (key: string, ttl: number) => {
@@ -33,44 +25,48 @@ export const useSessionStorage = (
     return expiry ? parseInt(expiry, 10) : null;
   };
 
-  // Function to sync sessionStorage across tabs
+  // Function to check if a key has expired
+  const isExpired = (key: string): boolean => {
+    const expiryTime = getExpiry(key);
+    return expiryTime ? Date.now() > expiryTime : false;
+  };
+
+  // Function to remove expired keys from sessionStorage and state
+  const removeExpiredKeys = () => {
+    Object.keys(sessionStorage).forEach((key) => {
+      if (key.endsWith('_expiry')) {
+        const originalKey = key.replace('_expiry', '');
+        if (isExpired(originalKey)) {
+          sessionStorage.removeItem(originalKey);
+          sessionStorage.removeItem(key);
+          setStoredValues((prevState) => {
+            const newState = { ...prevState };
+            delete newState[originalKey];
+            return newState;
+          });
+        }
+      }
+    });
+  };
+
+  // Sync expired keys removal on component mount and at regular intervals
+  useEffect(() => {
+    removeExpiredKeys(); // Initial check on mount
+    const interval = setInterval(removeExpiredKeys, 10000); // Check every 10 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  // Function to sync sessionStorage changes across tabs
   const syncStorageAcrossTabs = (e: StorageEvent) => {
     if (e.storageArea === sessionStorage) {
-      setStoredValues((prevState) => {
-        const updatedValues = { ...prevState };
-        updatedValues[e.key!] = e.newValue;
-        return updatedValues;
-      });
+      setStoredValues((prevState) => ({
+        ...prevState,
+        [e.key!]: e.newValue ? deserialize(e.newValue) : null,
+      }));
     }
   };
 
-  // Initialize sessionStorage values on the first render
   useEffect(() => {
-    if (keys.length === 0) return;
-
-    const values: StoredValues = {};
-    keys.forEach((key) => {
-      try {
-        const item = sessionStorage.getItem(key);
-        const expiry = getExpiry(key);
-
-        // Check if data has expired
-        if (item !== null && (expiry === null || Date.now() < expiry)) {
-          values[key] = deserialize(item);
-        } else {
-          values[key] = initialValues[key] ?? null;
-          if (initialValues[key] !== undefined) {
-            sessionStorage.setItem(key, serialize(initialValues[key] ?? ''));
-            if (ttl > 0) setExpiry(key, ttl);  // Set TTL if provided
-          }
-        }
-      } catch (err) {
-        setError("Failed to read from sessionStorage");
-      }
-    });
-
-    setStoredValues(values);
-
     // Listen for storage changes in other tabs
     window.addEventListener('storage', syncStorageAcrossTabs);
 
@@ -78,24 +74,24 @@ export const useSessionStorage = (
     return () => {
       window.removeEventListener('storage', syncStorageAcrossTabs);
     };
-  }, [keys, initialValues, ttl]);
+  }, []);
 
   // Function to set the value for a specific key
-  const setValue = (key: string, value: string | null) => {
+  const setValue = (key: string, value: string | null, ttl: number = 0) => {
     try {
       if (value === null) {
         sessionStorage.removeItem(key);
-        sessionStorage.removeItem(`${key}_expiry`); // Remove expiration
+        sessionStorage.removeItem(`${key}_expiry`);
       } else {
         sessionStorage.setItem(key, serialize(value));
-        if (ttl > 0) setExpiry(key, ttl); // Set TTL if needed
+        if (ttl > 0) setExpiry(key, ttl);
       }
       setStoredValues((prevState) => ({
         ...prevState,
         [key]: value,
       }));
       setError(null);
-    } catch (err) {
+    } catch {
       setError("Failed to write to sessionStorage");
     }
   };
@@ -111,30 +107,35 @@ export const useSessionStorage = (
         return newState;
       });
       setError(null);
-    } catch (err) {
+    } catch {
       setError("Failed to clear sessionStorage");
     }
   };
 
   // Function to add a new key-value pair
-  const addKey = (key: string, value: string | null) => {
-    setValue(key, value); // Add is just a specialized set operation
+  const addKey = (key: string, value: string | null, ttl: number = 0) => {
+    setValue(key, value, ttl);
   };
 
   // Function to delete a key from sessionStorage and state
   const deleteKey = (key: string) => {
-    clear(key); // Delete is just a specialized clear operation
+    clear(key);
   };
 
   // Function to retrieve a key's value from sessionStorage
   const getKey = (key: string) => {
+    if (isExpired(key)) {
+      clear(key); // Clear the expired key
+      return null;
+    }
     return storedValues[key] ?? null;
   };
 
   // Function to batch set multiple keys at once
-  const batchSet = (items: Record<string, string | null>) => {
-    Object.entries(items).forEach(([key, value]) => {
-      setValue(key, value);
+  const batchSet = (items: Record<string, string | null>, ttl: number = 0) => {
+    Object.keys(items).forEach((key) => {
+      const value = items[key];
+      setValue(key, value, ttl);
     });
   };
 
